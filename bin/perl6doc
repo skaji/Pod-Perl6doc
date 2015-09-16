@@ -1,0 +1,71 @@
+#!/usr/bin/env perl6
+use v6;
+BEGIN { die "Only support Unix environment." unless $*SPEC ~~ IO::Spec::Unix }
+
+multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
+    my $path = (-> $_ { .subst(:g, '::', '/') })($module);
+    for @*INC <-> $inc {
+        next unless $inc ~~ Str;
+        $inc ~~ s/^.*\#//;
+        my ($found, @) = <pm pm6>.map("$inc/$path." ~ *).grep({.IO.r});
+        next unless $found;
+        if $l {
+            say $found;
+        } elsif $m {
+            with-pager("cat $found");
+        } else {
+            with-pager("$*EXECUTABLE --doc $found");
+        }
+        exit;
+    }
+    my $message = $m ?? qq/No module found for "$module"./
+                     !! qq/No documentation found for "$module"./;
+    note $message;
+    exit 1;
+}
+
+sub USAGE() {
+    require Pod::To::Text;
+    say ::("Pod::To::Text").new.render($=pod);
+}
+
+sub which($command) {
+    return $command if $command.IO ~~ :x & :!d;
+    for IO::Spec::Unix.path -> $path {
+        my $try = "$path/$command";
+        return $try if $try.IO ~~ :x & :!d;
+    }
+    return;
+}
+
+sub with-pager($command) {
+    my $pager = $*ENV<PAGER>:exists ?? $*ENV<PAGER> !! "less";
+    $pager = Nil unless which($pager);
+    if $pager {
+        shell "$command | $pager";
+    } else {
+        shell $command;
+    }
+}
+
+=begin pod
+
+=head1 NAME
+
+perl6pod - perldoc for Perl6
+
+=head1 SYNOPSIS
+
+  > perl6doc [OPTIONS] MODULE
+
+  OPTIONS:
+  -l  Display the module's file name
+  -m  Display module's file in its entirety
+  -h  Show this help
+
+  EXAMPLES:
+  > perl6doc JSON::Tiny
+  > perl6doc -m Panda::Builder
+  > perl6doc -l Pod::To::Text
+
+=end pod
