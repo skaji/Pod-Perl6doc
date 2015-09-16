@@ -21,6 +21,10 @@ Pod::Perl6doc - perldoc for Perl6
     say @list[0..3];
   ...
 
+=head1 INSTALL
+
+  > panda install git://github.com/shoichikaji/Pod-Perl6doc.git
+
 =head1 DESCRIPTION
 
 Pod::Perl6doc is perldoc for Perl6.

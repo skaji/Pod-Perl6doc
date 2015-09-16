@@ -18,6 +18,11 @@ SYNOPSIS
       say @list[0..3];
     ...
 
+INSTALL
+=======
+
+    > panda install git://github.com/shoichikaji/Pod-Perl6doc.git
+
 DESCRIPTION
 ===========
 
