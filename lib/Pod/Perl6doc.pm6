@@ -9,17 +9,21 @@ Pod::Perl6doc - perldoc for Perl6
 
 =head1 SYNOPSIS
 
+  > perl6doc [OPTIONS] MODULE
+
+  OPTIONS:
+  -l  Display the module's file name
+  -m  Display module's file in its entirety
+  -h  Show this help
+
+  EXAMPLES:
   > perl6doc File::Find
+  > perl6doc -m Panda::Builder
+  > perl6doc -l Pod::To::Text
 
-  NAME
-
-  File::Find - Get a lazy list of a directory tree
-
-  SYNOPSIS
-    use File::Find;
-    my @list := find(dir => 'foo');
-    say @list[0..3];
-  ...
+  # for perl6/doc content
+  > perl6doc Proc::Async
+  > perl6doc 5to6-perlfunc
 
 =head1 INSTALL
 
