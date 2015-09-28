@@ -1,0 +1,17 @@
+{
+  "name" : "Pod::Perl6doc",
+  "source-url" : "git://github.com/shoichikaji/Pod-Perl6doc.git",
+  "perl" : "v6",
+  "provides" : {
+    "Pod::Perl6doc" : "lib/Pod/Perl6doc.pm6"
+  },
+  "depends" : [
+    "p6doc",
+    "Terminal::ANSIColor"
+  ],
+  "description" : "perldoc for Perl6",
+  "version" : "*",
+  "authors" : [
+    "Shoichi Kaji"
+  ]
+}
