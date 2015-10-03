@@ -35,10 +35,10 @@ multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
         if $l {
             say $perl-file.pm;
         } elsif $m {
-            with-pager("cat {$perl-file.pm}");
+            with-pager(file => $perl-file.pm);
         } else {
             temp %*ENV<POD_TO_TEXT_ANSI> = 1.Str;
-            with-pager("$*EXECUTABLE --doc {$perl-file.pod}");
+            with-pager(command => "$*EXECUTABLE --doc {$perl-file.pod}");
         }
     } else {
         my $message = $m ?? qq/No module found for "$module"./
@@ -53,24 +53,13 @@ sub USAGE() {
     say ::("Pod::To::Text").render($=pod);
 }
 
-sub which($command) {
-    return $command if $command.IO ~~ :x & :!d;
-    my @path = try { IO::Spec::Unix.path.list } || |();
-    for @path -> $path {
-        my $try = "$path/$command";
-        return $command if $try.IO ~~ :x & :!d;
-    }
-    return "less"; # XXX default less
-}
-
-sub with-pager($command) {
+sub with-pager(:$command, :$file) {
     my $pager = $*ENV<PAGER>:exists ?? $*ENV<PAGER> !! "less";
-    $pager = Nil unless which($pager);
-    if $pager {
-        temp %*ENV<LESS> = %*ENV<LESS>:exists ?? "%*ENV<LESS> -R" !! "-R" if $pager ~~ /less$/;
+    temp %*ENV<LESS> = %*ENV<LESS>:exists ?? "%*ENV<LESS> -R" !! "-R" if $pager ~~ /less$/;
+    if $file {
+        shell "$pager $file";
+    } elsif $command {
         shell "$command | $pager";
-    } else {
-        shell $command;
     }
 }
 
