@@ -2,14 +2,17 @@
   "name" : "Pod::Perl6doc",
   "source-url" : "git://github.com/shoichikaji/Pod-Perl6doc.git",
   "perl" : "v6",
+  "build-depends" : [ ],
   "provides" : {
-    "Pod::Perl6doc" : "lib/Pod/Perl6doc.pm6"
+    "Pod::Perl6doc" : "lib/Pod/Perl6doc.pm6",
+    "Pod::To::TextPodPerl6doc" : "lib/Pod/To/TextPodPerl6doc.pm6"
   },
   "depends" : [
     "p6doc",
     "Terminal::ANSIColor"
   ],
   "description" : "perldoc for Perl6",
+  "test-depends" : [ ],
   "version" : "*",
   "authors" : [
     "Shoichi Kaji"

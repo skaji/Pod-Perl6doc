@@ -37,8 +37,7 @@ multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
         } elsif $m {
             with-pager(file => $perl-file.pm);
         } else {
-            temp %*ENV<POD_TO_TEXT_ANSI> = 1.Str;
-            with-pager(command => "$*EXECUTABLE --doc {$perl-file.pod}");
+            with-pager(command => "$*EXECUTABLE --doc=TextPodPerl6doc {$perl-file.pod}");
         }
     } else {
         my $message = $m ?? qq/No module found for "$module"./
