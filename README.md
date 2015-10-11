@@ -43,3 +43,5 @@ COPYRIGHT AND LICENSE
 Copyright 2015 Shoichi Kaji <skaji@cpan.org>
 
 This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
+
+This module bundles a tweak version of Pod::To::Text which is a part of rakudo. rakudo license is The Artistic License 2.0. See [https://github.com/rakudo/rakudo](https://github.com/rakudo/rakudo) for further information.
