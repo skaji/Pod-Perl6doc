@@ -64,10 +64,6 @@ sub with-pager(:$command, :$file) {
 
 =begin pod
 
-=head1 NAME
-
-perl6pod - perldoc for Perl6
-
 =head1 SYNOPSIS
 
   > perl6doc [OPTIONS] MODULE
