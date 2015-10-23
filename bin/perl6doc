@@ -1,6 +1,42 @@
 #!/usr/bin/env perl6
 use v6;
 
+my class Cache {
+    has $!dir = %*ENV<HOME> ~ "/.perl6doc";
+    method !key(Str $file is copy) {
+        $file ~~ s:i:g/<-[a..z0..9.]>/_/;
+        "$!dir/$file";
+    }
+    method get(Str $file) {
+        my $key = self!key($file);
+        if $key.IO.e {
+            if $file.IO.modified <= $key.IO.modified {
+                return $key;
+            } else {
+                $key.unlink;
+            }
+        }
+        return;
+    }
+    method set(Str $file, Str:D $content) {
+        return if $content eq "";
+        my $key = self!key($file);
+        my $d = $key.IO.dirname;
+        unless $d.IO.d {
+            require Shell::Command;
+            GLOBAL::Shell::Command::EXPORT::DEFAULT::<&mkpath>($d);
+        }
+        $key.IO.spurt: $content;
+        $key;
+    }
+    method compute(Str $file, &cb) {
+        my $get = self.get($file);
+        return $get if $get;
+        my $content = &cb();
+        self.set($file, $content);
+    }
+}
+
 my class PerlFile {
     has $!module;
     has $.pod;
@@ -35,9 +71,17 @@ multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
         if $l {
             say $perl-file.pm;
         } elsif $m {
-            with-pager(file => $perl-file.pm);
+            with-pager($perl-file.pm);
         } else {
-            with-pager(command => "$*EXECUTABLE --doc=TextPodPerl6doc {$perl-file.pod}");
+            my $cache = Cache.new;
+            my $cache-file = $cache.compute: $perl-file.pod, {
+                qqx/$*EXECUTABLE --doc=TextPodPerl6doc {$perl-file.pod}/;
+            };
+            unless $cache-file {
+                note qq/File exists, but no documentation found for "$module"./;
+                exit 1;
+            }
+            with-pager($cache-file);
         }
     } else {
         my $message = $m ?? qq/No module found for "$module"./
@@ -52,14 +96,10 @@ sub USAGE() {
     say ::("Pod::To::Text").render($=pod);
 }
 
-sub with-pager(:$command, :$file) {
+sub with-pager($file) {
     my $pager = $*ENV<PAGER>:exists ?? $*ENV<PAGER> !! "less";
     temp %*ENV<LESS> = %*ENV<LESS>:exists ?? "%*ENV<LESS> -R" !! "-R" if $pager ~~ /less$/;
-    if $file {
-        shell "$pager $file";
-    } elsif $command {
-        shell "$command | $pager";
-    }
+    shell "$pager $file";
 }
 
 =begin pod
