@@ -3,12 +3,15 @@ use v6;
 
 my class Cache {
     has $!dir = %*ENV<HOME> ~ "/.perl6doc";
-    method !key(Str $file is copy) {
+    method !key($file is copy, $section?) {
         $file ~~ s:i:g/<-[a..z0..9.]>/_/;
+        if $section {
+            $file ~= ".$section";
+        }
         "$!dir/$file";
     }
-    method get(Str $file) {
-        my $key = self!key($file);
+    method get([$file, $section?]) {
+        my $key = self!key($file, $section);
         if $key.IO.e {
             if $file.IO.modified <= $key.IO.modified {
                 return $key;
@@ -18,8 +21,8 @@ my class Cache {
         }
         return;
     }
-    method set(Str $file, Str:D $content) {
-        my $key = self!key($file);
+    method set([$file, $section?], Str:D $content) {
+        my $key = self!key($file, $section);
         my $d = $key.IO.dirname;
         unless $d.IO.d {
             require Shell::Command;
@@ -28,11 +31,11 @@ my class Cache {
         $key.IO.spurt: $content;
         $key;
     }
-    method compute(Str $file, &cb) {
-        my $get = self.get($file);
+    method compute([$file, $section?], &cb) {
+        my $get = self.get([$file, $section]);
         return $get if $get;
         my $content = &cb();
-        self.set($file, $content);
+        self.set([$file, $section], $content);
     }
 }
 
@@ -64,7 +67,11 @@ my class PerlFile {
     method found() { so $!pm }
 }
 
-multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
+multi sub MAIN(Str $module is copy, Bool :$l, Bool :$m) {
+    my $section;
+    if $module ~~ s/\. (\S+) $// {
+        $section = $/[0].Str;
+    }
     my $perl-file = PerlFile.new(:$module);
     if $perl-file.found {
         if $l {
@@ -72,12 +79,15 @@ multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
         } elsif $m {
             with-pager($perl-file.pm);
         } else {
-            my $cache = Cache.new;
-            my $cache-file = $cache.compute: $perl-file.pod, {
-                qqx/$*EXECUTABLE --doc=TextPodPerl6doc {$perl-file.pod}/;
+            my $render = $section ?? "SectionFilterPodPerl6doc" !! "TextPodPerl6doc";
+            my $cache-file = Cache.new.compute: [$perl-file.pod, $section], {
+                temp %*ENV;
+                %*ENV<PERL6_POD_HEADING> = $section if $section;
+                qqx/$*EXECUTABLE --doc=$render {$perl-file.pod}/;
             };
             if $cache-file.IO.z {
-                note qq/File exists, but no documentation found for "$module"./;
+                my $arg = $section ?? "$module.$section" !! $module;
+                note qq/File exists, but no documentation found for "$arg"./;
                 exit 1;
             }
             with-pager($cache-file);
@@ -97,8 +107,9 @@ sub USAGE() {
 
 sub with-pager($file) {
     my $pager = $*ENV<PAGER>:exists ?? $*ENV<PAGER> !! "less";
-    temp %*ENV<LESS> = %*ENV<LESS>:exists ?? "%*ENV<LESS> -R" !! "-R" if $pager ~~ /less$/;
-    shell "$pager $file";
+    temp %*ENV;
+    %*ENV<LESS> = %*ENV<LESS>:exists ?? "%*ENV<LESS> -R" !! "-R" if $pager ~~ /less$/;
+    run $pager, $file;
 }
 
 =begin pod
@@ -120,5 +131,7 @@ sub with-pager($file) {
   # for perl6/doc content
   > perl6doc Proc::Async
   > perl6doc 5to6-perlfunc
+
+  > perl6doc Str.chars  # you can see a document for a specified method.
 
 =end pod
