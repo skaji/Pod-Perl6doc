@@ -9,7 +9,8 @@
   },
   "depends" : [
     "p6doc",
-    "Terminal::ANSIColor"
+    "Terminal::ANSIColor",
+    "Shell::Command"
   ],
   "description" : "perldoc for Perl6",
   "test-depends" : [ ],
