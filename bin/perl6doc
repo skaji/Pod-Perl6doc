@@ -13,7 +13,7 @@ my class Cache {
             if $file.IO.modified <= $key.IO.modified {
                 return $key;
             } else {
-                $key.unlink;
+                $key.IO.unlink;
             }
         }
         return;
