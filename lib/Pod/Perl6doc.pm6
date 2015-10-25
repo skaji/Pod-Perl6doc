@@ -35,9 +35,9 @@ Pod::Perl6doc - perldoc for Perl6
 
 Pod::Perl6doc is perldoc for Perl6.
 
-We already has C<p6doc> command in perl6. Why do you use C<perl6doc>?
+We already have C<p6doc> command in perl6. Why do you use C<perl6doc>?
 
-=item perl6doc renders documentatin in colors.
+=item perl6doc renders documentation in colors.
 
 =item perl6doc caches rendered documentations in C< ~/.perl6doc >, because perl6's parsing pods is too slow.
 
