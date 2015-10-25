@@ -19,7 +19,6 @@ my class Cache {
         return;
     }
     method set(Str $file, Str:D $content) {
-        return if $content eq "";
         my $key = self!key($file);
         my $d = $key.IO.dirname;
         unless $d.IO.d {
@@ -77,7 +76,7 @@ multi sub MAIN(Str $module, Bool :$l, Bool :$m) {
             my $cache-file = $cache.compute: $perl-file.pod, {
                 qqx/$*EXECUTABLE --doc=TextPodPerl6doc {$perl-file.pod}/;
             };
-            unless $cache-file {
+            if $cache-file.IO.z {
                 note qq/File exists, but no documentation found for "$module"./;
                 exit 1;
             }
