@@ -62,13 +62,13 @@ sub item2text($pod) {
 
 sub named2text($pod) {
     given $pod.name {
-        when 'pod'  { pod2text($pod.contents)     }
-        when 'para' { para2text($pod.contents[0]) }
-        when 'defn' { pod2text($pod.contents[0]) ~ "\n"
+        when 'pod'  { colored(pod2text($pod.contents), "cyan")     }
+        when 'para' { colored(para2text($pod.contents[0]), "cyan") }
+        when 'defn' { colored(pod2text($pod.contents[0]), "cyan") ~ "\n"
                     ~ pod2text($pod.contents[1..*-1]) }
         when 'config' { }
         when 'nested' { }
-        default     { $pod.name ~ "\n" ~ pod2text($pod.contents) }
+        default     { colored($pod.name, "cyan") ~ "\n" ~ pod2text($pod.contents) }
     }
 }
 
